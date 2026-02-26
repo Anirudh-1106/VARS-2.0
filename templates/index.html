@@ -1,0 +1,200 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>VARS - Voice AI Resume System</title>
+    <style>
+        :root {
+            --accent: #2563eb;
+            --accent-hover: #1d4ed8;
+            --danger: #ef4444;
+            --success: #22c55e;
+            --warn: #f59e0b;
+            --bg: #f8fafc;
+            --card: #ffffff;
+            --text: #1e293b;
+            --muted: #64748b;
+            --border: #e2e8f0;
+            --radius: 10px;
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+
+        body {
+            font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            line-height: 1.6;
+        }
+
+        .container { max-width: 960px; margin: 0 auto; padding: 24px 20px; }
+
+        h1 { font-size: 1.8rem; font-weight: 700; margin-bottom: 4px; }
+        .subtitle { color: var(--muted); margin-bottom: 24px; }
+
+        /* Cards */
+        .card {
+            background: var(--card);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            padding: 20px;
+            margin-bottom: 16px;
+        }
+        .card h2 { font-size: 1.1rem; font-weight: 600; margin-bottom: 12px; display: flex; align-items: center; gap: 8px; }
+
+        /* Buttons */
+        .btn {
+            display: inline-flex; align-items: center; gap: 6px;
+            padding: 10px 20px; border: none; border-radius: 8px;
+            font-size: 0.9rem; font-weight: 600; cursor: pointer;
+            transition: all 0.15s;
+        }
+        .btn:hover { transform: translateY(-1px); }
+        .btn-primary { background: var(--accent); color: #fff; }
+        .btn-primary:hover { background: var(--accent-hover); }
+        .btn-danger { background: var(--danger); color: #fff; }
+        .btn-success { background: var(--success); color: #fff; }
+        .btn-warn { background: var(--warn); color: #fff; }
+        .btn-outline { background: transparent; border: 1px solid var(--border); color: var(--text); }
+        .btn-outline:hover { border-color: var(--accent); color: var(--accent); }
+        .btn-sm { padding: 5px 12px; font-size: 0.8rem; }
+
+        /* Recording controls */
+        .record-controls { display: flex; gap: 12px; flex-wrap: wrap; align-items: center; }
+        #status { font-size: 0.9rem; color: var(--muted); font-weight: 500; }
+        #status.recording { color: var(--danger); }
+        #status.processing { color: var(--warn); }
+
+        /* Mode toggle */
+        .mode-toggle { display: flex; gap: 8px; margin-bottom: 16px; }
+        .mode-btn {
+            padding: 8px 16px; border: 2px solid var(--border); border-radius: 8px;
+            background: transparent; cursor: pointer; font-weight: 600; font-size: 0.85rem;
+            transition: all 0.15s;
+        }
+        .mode-btn.active { border-color: var(--accent); background: var(--accent); color: #fff; }
+
+        /* Transcript boxes */
+        .text-box {
+            padding: 12px 16px; border: 1px solid var(--border); border-radius: 8px;
+            min-height: 48px; font-size: 0.95rem; white-space: pre-wrap;
+            background: #f9fafb; margin-bottom: 10px;
+        }
+        .text-box.translation { background: #eff6ff; border-color: #93c5fd; }
+        .text-box-label { font-size: 0.78rem; font-weight: 600; color: var(--muted); text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 4px; }
+
+        /* Resume preview table */
+        .resume-table { width: 100%; border-collapse: collapse; }
+        .resume-table th, .resume-table td {
+            text-align: left; padding: 8px 12px; border-bottom: 1px solid var(--border);
+            font-size: 0.9rem; vertical-align: top;
+        }
+        .resume-table th { font-weight: 600; width: 130px; color: var(--muted); white-space: nowrap; }
+        .resume-table td { color: var(--text); }
+
+        /* Editable field */
+        .field-actions { display: flex; gap: 6px; margin-top: 4px; }
+        .edit-input {
+            width: 100%; padding: 6px 10px; border: 1px solid var(--accent);
+            border-radius: 6px; font-size: 0.9rem; font-family: inherit;
+        }
+        textarea.edit-input { min-height: 60px; resize: vertical; }
+
+        /* List items */
+        .list-item {
+            display: flex; justify-content: space-between; align-items: flex-start;
+            padding: 6px 0; border-bottom: 1px solid #f1f5f9;
+        }
+        .list-item:last-child { border-bottom: none; }
+
+        /* Missing fields */
+        .missing-badge {
+            display: inline-block; padding: 3px 10px; border-radius: 20px;
+            font-size: 0.78rem; font-weight: 600; background: #fef3c7; color: #92400e;
+            margin: 2px;
+        }
+
+        /* Bottom actions bar */
+        .bottom-bar {
+            display: flex; gap: 12px; flex-wrap: wrap; padding: 16px 0;
+            border-top: 1px solid var(--border); margin-top: 8px;
+        }
+
+        /* Toast notification */
+        .toast {
+            position: fixed; bottom: 24px; right: 24px; padding: 12px 20px;
+            background: #1e293b; color: #fff; border-radius: 8px;
+            font-size: 0.9rem; z-index: 1000; opacity: 0; transition: opacity 0.3s;
+            max-width: 400px;
+        }
+        .toast.show { opacity: 1; }
+
+        @media (max-width: 640px) {
+            .container { padding: 16px 12px; }
+            .record-controls { flex-direction: column; align-items: stretch; }
+        }
+    </style>
+</head>
+<body>
+<div class="container">
+
+    <h1>VARS</h1>
+    <p class="subtitle">Voice-based AI Resume System &mdash; Speak in Malayalam, build your resume</p>
+
+    <!-- Mode Selection -->
+    <div class="card">
+        <h2>Mode</h2>
+        <div class="mode-toggle">
+            <button class="mode-btn active" data-mode="dictate" onclick="setMode('dictate')">
+                Dictate Resume Info
+            </button>
+            <button class="mode-btn" data-mode="command" onclick="setMode('command')">
+                Voice Commands (Edit/Delete)
+            </button>
+        </div>
+
+        <div class="record-controls">
+            <button id="recordBtn" class="btn btn-primary">&#127908; Start Recording</button>
+            <span id="status">Idle</span>
+        </div>
+    </div>
+
+    <!-- Transcript Display -->
+    <div class="card">
+        <h2>Latest Input</h2>
+        <div class="text-box-label">Malayalam Transcript</div>
+        <div class="text-box" id="transcript">Transcription will appear here...</div>
+        <div class="text-box-label">English Translation</div>
+        <div class="text-box translation" id="translation">Translation will appear here...</div>
+        <div id="commandResult" style="display:none; margin-top:10px; padding:10px; border-radius:8px; background:#f0fdf4; border:1px solid #86efac; font-size:0.9rem;"></div>
+    </div>
+
+    <!-- Resume Data Preview -->
+    <div class="card">
+        <h2>Resume Data
+            <span id="missingBadges" style="margin-left:auto;"></span>
+        </h2>
+        <div id="resumePreview">
+            <p style="color:var(--muted); font-style:italic;">No data yet. Start speaking to fill your resume.</p>
+        </div>
+    </div>
+
+    <!-- Actions -->
+    <div class="card">
+        <h2>Actions</h2>
+        <div class="bottom-bar" style="border-top:none; margin-top:0; padding-top:0;">
+            <button class="btn btn-warn" onclick="doProfessionalize()">&#9997; Professionalize Content</button>
+            <button class="btn btn-success" onclick="window.open('/resume','_blank')">&#128196; Preview Resume</button>
+            <button class="btn btn-primary" onclick="window.location.href='/resume/download'">&#11015; Download PDF</button>
+            <button class="btn btn-danger btn-sm" onclick="if(confirm('Reset all resume data?')) resetResume()">Reset</button>
+        </div>
+    </div>
+
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script src="/static/recorder.js"></script>
+</body>
+</html>

@@ -1,0 +1,11 @@
+
+flask
+transformers
+torch
+torchaudio
+soundfile
+librosa
+numpy
+weasyprint
+pydub
+requests

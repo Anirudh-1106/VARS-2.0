@@ -1,0 +1,287 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ resume.name or "Resume" }}</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        /* ── CSS Variables ── */
+        :root {
+            --accent: #2563eb;
+            --accent-light: #eff6ff;
+            --text-primary: #111827;
+            --text-secondary: #4b5563;
+            --text-muted: #6b7280;
+            --border: #e5e7eb;
+            --bg: #ffffff;
+            --pill-bg: #f3f4f6;
+        }
+
+        /* ── Reset & Base ── */
+        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+        html {
+            font-size: 15px;
+            -webkit-print-color-adjust: exact;
+            print-color-adjust: exact;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            color: var(--text-primary);
+            background: #f9fafb;
+            line-height: 1.6;
+        }
+
+        /* ── Page Container (A4) ── */
+        .resume-page {
+            width: 210mm;
+            min-height: 297mm;
+            margin: 24px auto;
+            padding: 40px 48px;
+            background: var(--bg);
+            box-shadow: 0 1px 3px rgba(0,0,0,.12), 0 4px 20px rgba(0,0,0,.06);
+        }
+
+        /* ── Header ── */
+        .header { text-align: center; margin-bottom: 28px; padding-bottom: 20px; border-bottom: 2px solid var(--accent); }
+        .header h1 { font-size: 2rem; font-weight: 700; letter-spacing: -0.5px; color: var(--text-primary); margin-bottom: 8px; }
+        .contact-row { display: flex; flex-wrap: wrap; justify-content: center; gap: 6px 20px; font-size: 0.88rem; color: var(--text-secondary); }
+        .contact-row a { color: var(--accent); text-decoration: none; }
+        .contact-row a:hover { text-decoration: underline; }
+        .contact-item::before { content: ''; display: inline-block; width: 4px; height: 4px; border-radius: 50%; background: var(--text-muted); vertical-align: middle; margin-right: 8px; }
+        .contact-item:first-child::before { display: none; }
+
+        /* ── Section ── */
+        .section { margin-bottom: 22px; }
+        .section-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 10px; }
+        .section-title {
+            font-size: 1.05rem; font-weight: 700; text-transform: uppercase; letter-spacing: 1.2px;
+            color: var(--accent); border-bottom: 2px solid var(--accent); padding-bottom: 3px;
+        }
+
+        /* ── Edit Button ── */
+        .edit-btn {
+            background: none; border: 1px solid var(--border); border-radius: 4px;
+            padding: 3px 10px; font-size: 0.75rem; color: var(--text-muted);
+            cursor: pointer; transition: all 0.15s;
+        }
+        .edit-btn:hover { border-color: var(--accent); color: var(--accent); }
+
+        /* ── Summary ── */
+        .summary-text { font-size: 0.93rem; color: var(--text-secondary); line-height: 1.7; }
+
+        /* ── Skills Pills ── */
+        .skills-list { display: flex; flex-wrap: wrap; gap: 8px; }
+        .skill-pill {
+            background: var(--pill-bg); border: 1px solid var(--border); border-radius: 20px;
+            padding: 4px 14px; font-size: 0.84rem; font-weight: 500; color: var(--text-primary);
+        }
+
+        /* ── Experience ── */
+        .exp-item { margin-bottom: 16px; page-break-inside: avoid; }
+        .exp-item:last-child { margin-bottom: 0; }
+        .exp-top { display: flex; justify-content: space-between; align-items: baseline; flex-wrap: wrap; }
+        .exp-role { font-weight: 600; font-size: 0.95rem; }
+        .exp-company { color: var(--accent); font-weight: 500; font-size: 0.93rem; }
+        .exp-duration { font-size: 0.84rem; color: var(--text-muted); white-space: nowrap; }
+        .exp-bullets { margin-top: 6px; padding-left: 20px; }
+        .exp-bullets li { font-size: 0.88rem; color: var(--text-secondary); margin-bottom: 3px; line-height: 1.55; }
+
+        /* ── Education ── */
+        .edu-item { margin-bottom: 10px; page-break-inside: avoid; display: flex; justify-content: space-between; align-items: baseline; flex-wrap: wrap; }
+        .edu-item:last-child { margin-bottom: 0; }
+        .edu-degree { font-weight: 600; font-size: 0.93rem; }
+        .edu-institution { color: var(--text-secondary); font-size: 0.88rem; }
+        .edu-year { font-size: 0.84rem; color: var(--text-muted); white-space: nowrap; }
+
+        /* ── Projects ── */
+        .proj-item { margin-bottom: 14px; page-break-inside: avoid; }
+        .proj-item:last-child { margin-bottom: 0; }
+        .proj-name { font-weight: 600; font-size: 0.93rem; }
+        .proj-desc { font-size: 0.88rem; color: var(--text-secondary); margin-top: 2px; line-height: 1.55; }
+        .proj-tech { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 6px; }
+        .proj-tech-tag {
+            background: var(--accent-light); color: var(--accent); border-radius: 4px;
+            padding: 2px 8px; font-size: 0.78rem; font-weight: 500;
+        }
+
+        /* ── Empty State ── */
+        .empty { font-size: 0.88rem; color: var(--text-muted); font-style: italic; }
+
+        /* ── Floating Actions (screen only) ── */
+        .floating-actions {
+            position: fixed; bottom: 28px; right: 28px; display: flex; flex-direction: column; gap: 10px; z-index: 100;
+        }
+        .fab {
+            padding: 12px 24px; border: none; border-radius: 8px; font-size: 0.9rem; font-weight: 600;
+            cursor: pointer; box-shadow: 0 4px 14px rgba(0,0,0,.15); transition: transform 0.15s, box-shadow 0.15s;
+        }
+        .fab:hover { transform: translateY(-2px); box-shadow: 0 6px 20px rgba(0,0,0,.2); }
+        .fab-pdf { background: var(--accent); color: #fff; }
+        .fab-back { background: var(--bg); color: var(--text-primary); border: 1px solid var(--border); }
+
+        /* ── Print Styles ── */
+        @media print {
+            html { font-size: 13px; }
+            body { background: #fff; }
+            .resume-page { margin: 0; padding: 20mm 18mm; box-shadow: none; width: 100%; }
+            .floating-actions, .edit-btn { display: none !important; }
+            .section { margin-bottom: 16px; }
+            .exp-item, .edu-item, .proj-item { page-break-inside: avoid; }
+            a { color: #111 !important; text-decoration: none !important; }
+        }
+
+        @page {
+            size: A4;
+            margin: 0;
+        }
+    </style>
+</head>
+<body>
+
+<div class="resume-page">
+
+    <!-- ══ HEADER ══ -->
+    <header class="header">
+        <h1>{{ resume.name or "Your Name" }}</h1>
+        <div class="contact-row">
+            {% if resume.email %}
+                <span class="contact-item">{{ resume.email }}</span>
+            {% endif %}
+            {% if resume.phone %}
+                <span class="contact-item">{{ resume.phone }}</span>
+            {% endif %}
+            {% if resume.linkedin %}
+                <span class="contact-item"><a href="{{ resume.linkedin }}" target="_blank">LinkedIn</a></span>
+            {% endif %}
+            {% if resume.github %}
+                <span class="contact-item"><a href="{{ resume.github }}" target="_blank">GitHub</a></span>
+            {% endif %}
+        </div>
+    </header>
+
+    <!-- ══ SUMMARY ══ -->
+    {% if resume.summary %}
+    <section class="section">
+        <div class="section-header">
+            <span class="section-title">Summary</span>
+            <button class="edit-btn" onclick="editSection('summary')">Edit</button>
+        </div>
+        <p class="summary-text">{{ resume.summary }}</p>
+    </section>
+    {% endif %}
+
+    <!-- ══ SKILLS ══ -->
+    {% if resume.skills %}
+    <section class="section">
+        <div class="section-header">
+            <span class="section-title">Skills</span>
+            <button class="edit-btn" onclick="editSection('skills')">Edit</button>
+        </div>
+        <div class="skills-list">
+            {% for skill in resume.skills %}
+                <span class="skill-pill">{{ skill }}</span>
+            {% endfor %}
+        </div>
+    </section>
+    {% endif %}
+
+    <!-- ══ EXPERIENCE ══ -->
+    {% if resume.experience %}
+    <section class="section">
+        <div class="section-header">
+            <span class="section-title">Experience</span>
+            <button class="edit-btn" onclick="editSection('experience')">Edit</button>
+        </div>
+        {% for exp in resume.experience %}
+        <div class="exp-item">
+            <div class="exp-top">
+                <div>
+                    <span class="exp-role">{{ exp.role }}</span>
+                    <span class="exp-company"> &mdash; {{ exp.company }}</span>
+                </div>
+                <span class="exp-duration">{{ exp.duration }}</span>
+            </div>
+            {% if exp.bullets %}
+            <ul class="exp-bullets">
+                {% for bullet in exp.bullets %}
+                    <li>{{ bullet }}</li>
+                {% endfor %}
+            </ul>
+            {% endif %}
+        </div>
+        {% endfor %}
+    </section>
+    {% endif %}
+
+    <!-- ══ EDUCATION ══ -->
+    {% if resume.education %}
+    <section class="section">
+        <div class="section-header">
+            <span class="section-title">Education</span>
+            <button class="edit-btn" onclick="editSection('education')">Edit</button>
+        </div>
+        {% for edu in resume.education %}
+        <div class="edu-item">
+            <div>
+                <span class="edu-degree">{{ edu.degree }}</span>
+                <span class="edu-institution"> &mdash; {{ edu.institution }}</span>
+            </div>
+            <span class="edu-year">{{ edu.year }}</span>
+        </div>
+        {% endfor %}
+    </section>
+    {% endif %}
+
+    <!-- ══ PROJECTS ══ -->
+    {% if resume.projects %}
+    <section class="section">
+        <div class="section-header">
+            <span class="section-title">Projects</span>
+            <button class="edit-btn" onclick="editSection('projects')">Edit</button>
+        </div>
+        {% for proj in resume.projects %}
+        <div class="proj-item">
+            <span class="proj-name">{{ proj.name }}</span>
+            <p class="proj-desc">{{ proj.description }}</p>
+            {% if proj.tech_stack %}
+            <div class="proj-tech">
+                {% for tech in proj.tech_stack %}
+                    <span class="proj-tech-tag">{{ tech }}</span>
+                {% endfor %}
+            </div>
+            {% endif %}
+        </div>
+        {% endfor %}
+    </section>
+    {% endif %}
+
+</div>
+
+<!-- ══ FLOATING BUTTONS (screen only) ══ -->
+<div class="floating-actions">
+    <button class="fab fab-pdf" onclick="window.location.href='/resume/download'">&#128196; Download PDF</button>
+    <button class="fab fab-back" onclick="window.location.href='/'">&#8592; Back</button>
+</div>
+
+<script>
+    function editSection(field) {
+        fetch("/edit", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ field: field })
+        })
+        .then(res => res.json())
+        .then(data => {
+            console.log("Edit response:", data);
+            if (data.message) alert(data.message);
+        })
+        .catch(err => console.error("Edit error:", err));
+    }
+</script>
+
+</body>
+</html>

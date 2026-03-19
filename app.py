@@ -38,7 +38,7 @@ def transcribe():
         # Step 1: Sarvam STT  (Malayalam audio -> Malayalam text)
         malayalam_text = transcribe_audio(audio_bytes)
 
-        # Step 2: Sarvam Translate  (Malayalam text -> English text)
+        # Step 2: IndicTrans2  (Malayalam text -> English text)
         try:
             english_text = translate_malayalam_to_english(malayalam_text)
         except Exception as te:
